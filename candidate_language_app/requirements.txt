@@ -1,0 +1,9 @@
+streamlit
+transformers
+torch
+torchaudio
+soundfile
+pydub
+python-dotenv
+librosa
+streamlit-mic-recorder
