@@ -1,40 +1,24 @@
 import os
-from pydub import AudioSegment
 import io
 import soundfile as sf
 import librosa
 import tempfile
 import numpy as np
+from pydub import AudioSegment
 
 def process_audio(audio_data, file_extension):
     """
     Processes audio data (bytes or path) and returns a unique temporary 16kHz mono WAV file path.
+    Prioritizes soundfile for WAV to avoid ffmpeg dependency when possible.
     """
     temp_wav_path = None
     try:
         # Normalize file extension
         ext = file_extension.lower().replace('.', '')
 
-        # Try using pydub first
-        try:
-            if isinstance(audio_data, bytes):
-                audio = AudioSegment.from_file(io.BytesIO(audio_data), format=ext)
-            else:
-                audio = AudioSegment.from_file(audio_data)
-
-            # Normalize audio (convert to mono, 16kHz)
-            audio = audio.set_frame_rate(16000).set_channels(1)
-
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav:
-                temp_wav_path = temp_wav.name
-                audio.export(temp_wav_path, format="wav")
-            return temp_wav_path
-
-        except Exception as pydub_err:
-            print(f"Pydub failed: {pydub_err}. Trying soundfile/librosa fallback for WAV/FLAC.")
-
-            # Fallback for WAV using soundfile/librosa (doesn't require ffmpeg)
-            if ext in ['wav', 'flac']:
+        # 1. Primary path for WAV/FLAC (Native soundfile support)
+        if ext in ['wav', 'flac']:
+            try:
                 if isinstance(audio_data, bytes):
                     data, samplerate = sf.read(io.BytesIO(audio_data))
                 else:
@@ -52,9 +36,26 @@ def process_audio(audio_data, file_extension):
                     temp_wav_path = temp_wav.name
                     sf.write(temp_wav_path, data, 16000)
                 return temp_wav_path
+            except Exception as sf_err:
+                print(f"Soundfile failed for {ext}: {sf_err}. Falling back to pydub.")
+
+        # 2. Secondary path for all other formats or if soundfile failed
+        try:
+            if isinstance(audio_data, bytes):
+                audio = AudioSegment.from_file(io.BytesIO(audio_data), format=ext)
             else:
-                # If it's MP3/M4A and pydub failed (likely missing ffmpeg), we can't do much without ffmpeg
-                raise Exception(f"Failed to process {ext} file. ffmpeg might be missing. Error: {pydub_err}")
+                audio = AudioSegment.from_file(audio_data)
+
+            # Normalize audio (convert to mono, 16kHz)
+            audio = audio.set_frame_rate(16000).set_channels(1)
+
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_wav:
+                temp_wav_path = temp_wav.name
+                audio.export(temp_wav_path, format="wav")
+            return temp_wav_path
+
+        except Exception as pydub_err:
+            raise Exception(f"Failed to process {ext} file. ffmpeg/ffprobe might be missing or file format is unsupported. Error: {pydub_err}")
 
     except Exception as e:
         if temp_wav_path and os.path.exists(temp_wav_path):

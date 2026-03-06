@@ -140,12 +140,12 @@ def main():
                 else:
                     st.error("Failed to send application email. Please check server logs.")
 
-                # Clean up unique temp file
-                if os.path.exists(temp_audio_path):
-                    os.remove(temp_audio_path)
-
             except Exception as e:
                 st.error(f"An error occurred: {e}")
+            finally:
+                # Clean up unique temp file
+                if temp_audio_path and os.path.exists(temp_audio_path):
+                    os.remove(temp_audio_path)
 
 if __name__ == "__main__":
     main()
