@@ -57,7 +57,6 @@ def main():
         start_prompt="Start Recording",
         stop_prompt="Stop Recording",
         just_once=False,
-        use_recorder=True,
         key="recorder"
     )
 
