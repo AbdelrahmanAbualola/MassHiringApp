@@ -94,6 +94,7 @@ def main():
             return
 
         with st.spinner("Processing your application and analyzing speech proficiency..."):
+            temp_audio_path = None
             try:
                 # 5.1 Speech Processing
                 # Convert to unique temporary WAV for processing
