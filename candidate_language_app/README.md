@@ -1,52 +1,43 @@
-# Candidate Language Proficiency Application
+# Candidate Job Application Portal
 
-This is a Streamlit-based web application designed to collect candidate job applications and evaluate their spoken language proficiency using AI.
+A Streamlit-based web application for job candidates to apply, featuring AI-generated personal introductions based on their CVs.
 
 ## Features
-- Candidate information form (Name, Phone, Resume upload).
-- Voice recording directly in the browser or via file upload (WAV, MP3, M4A).
-- Speech-to-text transcription and proficiency scoring using Hugging Face's OpenAI Whisper model.
-- Automated email notifications to recruiters with candidate details and attachments.
-- Interactive and user-friendly interface with model caching for performance.
+- **Candidate Form**: Collects name, phone number, and CV.
+- **CV Analysis**: Parses uploaded PDF/DOCX files and extracts text.
+- **AI Introduction**: Automatically generates a "Introduce yourself" summary paragraph in the selected language (English, German, or Italian) based on the candidate's CV.
+- **Voice Recording**: Candidates record themselves reading the AI-generated introduction.
+- **Automated Notification**: Sends an email to recruiters with candidate details, the AI summary, the recording transcription, and all attachments.
 
 ## Project Structure
 ```text
 candidate_language_app/
 ├── app.py                   # Main Streamlit application
 ├── services/
-│   ├── speech_analysis.py   # Hugging Face transcription and analysis (Cached)
-│   └── email_service.py     # Email sending service using smtplib
+│   ├── cv_summary.py        # AI logic for generating introductions
+│   ├── speech_analysis.py   # Transcription logic using OpenAI Whisper
+│   └── email_service.py     # Email notification logic
 ├── utils/
-│   ├── audio_processing.py  # Audio format normalization (16kHz WAV)
-│   └── scoring.py           # Proficiency and CEFR scoring logic
-├── .env.example             # Example environment variables
-├── requirements.txt         # Project dependencies
-└── README.md                # Project documentation
+│   ├── audio_processing.py  # Audio normalization
+│   └── cv_parser.py         # PDF/DOCX text extraction
+├── packages.txt             # System-level dependencies (ffmpeg)
+├── requirements.txt         # Python dependencies
+└── README.md                # Documentation
 ```
 
 ## Setup Instructions
 
 ### 1. Prerequisites
 - Python 3.10+
-- **ffmpeg** (Required for `pydub` to handle MP3/M4A audio processing).
-  - **Linux**: `sudo apt install ffmpeg`
-  - **macOS**: `brew install ffmpeg`
-  - **Windows**: [Download and install ffmpeg](https://ffmpeg.org/download.html) and add to PATH.
+- **ffmpeg** (Required for audio processing).
 
-### 2. Clone the Repository
-```bash
-git clone <repository-url>
-cd candidate_language_app
-```
-
-### 3. Install Dependencies
-Ensure you have Python 3.10+ installed.
+### 2. Installation
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Environment Configuration
-Create a `.env` file in the root directory and add the following:
+### 3. Configuration
+Create a `.env` file in the root with your SMTP credentials:
 ```env
 EMAIL_ADDRESS=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
@@ -54,17 +45,12 @@ SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 RECIPIENT_EMAIL=abdelrahman.m.abualola@gmail.com
 ```
-*Note: If using Gmail, you may need to generate an [App Password](https://support.google.com/accounts/answer/185833).*
 
-### 5. Run the Application
+### 4. Run
 ```bash
 streamlit run app.py
 ```
 
-## How It Works
-1. **Form Submission**: The candidate fills in their name, phone number, and uploads a resume.
-2. **Language Selection**: The candidate selects the language for the proficiency test.
-3. **Voice Recording**: The candidate records a short message or uploads an existing recording.
-4. **Speech Analysis**: On submission, the app uses a cached Whisper model to transcribe the audio and calculate a proficiency score based on model confidence and recording duration.
-5. **Email Delivery**: An automated email is sent to the recruiter containing the analysis results and the attached resume/recording.
-6. **User Feedback**: The candidate receives immediate feedback and their results on the screen.
+## AI Models Used
+- **CV Summarization**: `google/flan-t5-small` via Hugging Face.
+- **Speech-to-Text**: `openai/whisper-small` via Hugging Face.

@@ -7,3 +7,5 @@ pydub
 python-dotenv
 librosa
 streamlit-mic-recorder
+pypdf
+python-docx

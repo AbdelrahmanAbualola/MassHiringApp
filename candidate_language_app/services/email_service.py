@@ -17,26 +17,27 @@ DEFAULT_RECIPIENT = os.getenv("RECIPIENT_EMAIL", "abdelrahman.m.abualola@gmail.c
 
 def send_application_email(recipient_email, candidate_info, analysis_results, resume_file, audio_file):
     """
-    Sends a candidate application email with attachments (resume and voice recording).
+    Sends a candidate application email with the CV and voice recording.
     """
     try:
         # Create message container
         msg = MIMEMultipart()
         msg['From'] = EMAIL_ADDRESS
         msg['To'] = recipient_email
-        msg['Subject'] = "New Candidate Application Submission"
+        msg['Subject'] = f"New Candidate Application: {candidate_info['name']}"
 
         # Email body
         body = f"""
-        New Candidate Application Details:
+        A new candidate has submitted their application.
 
         Candidate Name: {candidate_info['name']}
         Phone Number: {candidate_info['phone']}
-        Selected Language: {candidate_info['language']}
-        Language Proficiency Score: {analysis_results['score']}/100
-        CEFR Level: {analysis_results['cefr_level']}
+        Applied Language: {candidate_info['language']}
 
-        Transcript:
+        AI-Generated Introduction (Read by candidate):
+        {candidate_info['ai_summary']}
+
+        Recording Transcript:
         {analysis_results['transcript']}
         """
 
